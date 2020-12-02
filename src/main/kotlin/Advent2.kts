@@ -1,11 +1,16 @@
 import java.nio.file.Files
 import java.nio.file.Paths
 
-data class ParsedLine(val password: String, val character: Char, val lowerBound: Int, val upperBound: Int){
-    fun isValid(): Boolean {
+data class ParsedLine(val password: String, val character: Char, val leftNum: Int, val rightNum: Int){
+    fun firstIsValid(): Boolean {
         val occurrences = password.count{it == character}
+        return occurrences in leftNum..rightNum
+    }
 
-        return occurrences in lowerBound..upperBound
+    fun secondIsValid(): Boolean {
+        val leftMatch = password[leftNum - 1] == character
+        val rightMatch = password[rightNum -1 ] == character
+        return leftMatch xor rightMatch
     }
 }
 
@@ -21,15 +26,14 @@ fun parseLine(line: String): ParsedLine {
     }
 }
 
-
-// Laziness
 val input: List<String> = Files.readAllLines(
     Paths.get("/home/chris/code/advent/src/main/resources/day2input.txt")
 )!!
 
 val parsedInput = input.map{parseLine(it)}
-//val validInput = parsedInput.map{it to it.isValid()}
-//validInput.drop(990).forEach{println(it)}
 
-val validInput = parsedInput.filter{it.isValid()}
-validInput.count()
+val firstValid = parsedInput.filter{it.firstIsValid()}
+println(firstValid.count())
+
+val secondValid = parsedInput.filter{it.secondIsValid()}
+println(secondValid.count())

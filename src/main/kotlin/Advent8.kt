@@ -14,6 +14,10 @@ sealed class Instruction() {
     data class Nop(val int: Int) : Instruction()
 }
 
+interface Execution
+data class FailedExecution(val accValue: Int) : Execution
+data class SuccessfulExecution(val accValue: Int) : Execution
+
 val lineRegex = Regex("""(nop|acc|jmp) ([+\-][0-9]+)""")
 fun parseInstruction(line: String): Instruction {
 
@@ -30,11 +34,14 @@ fun parseInstruction(line: String): Instruction {
     }
 }
 
-fun execute(instructions: List<Instruction>): Int {
+fun execute(instructions: List<Instruction>): Execution {
+    val maxInstructions = instructions.size
 
-    tailrec fun nextStatement(programCounter: Int, accumulator: Int, previousInstructions: Set<Int>): Int {
-        if (previousInstructions.contains(programCounter)){
-            return accumulator
+    tailrec fun nextStatement(programCounter: Int, accumulator: Int, previousInstructions: Set<Int>): Execution {
+        if (programCounter >= maxInstructions) {
+            return SuccessfulExecution(accumulator)
+        } else if (previousInstructions.contains(programCounter)) {
+            return FailedExecution(accumulator)
         }
         return when (val current = instructions[programCounter]) {
             is Acc -> nextStatement(programCounter + 1, accumulator + current.int, previousInstructions + programCounter)
@@ -45,11 +52,32 @@ fun execute(instructions: List<Instruction>): Int {
     return nextStatement(0, 0, setOf())
 }
 
+fun generateAlternativeInstructions(instructions: List<Instruction>): List<List<Instruction>> {
+    val indexedInstructions: Map<Int, Instruction> = instructions.mapIndexed { index, instruction -> Pair(index, instruction) }.toMap()
+
+    val allPermutations: List<List<Instruction>> = instructions.mapIndexedNotNull { index, instructionToReplace ->
+        val newInstruction: Instruction? = when (instructionToReplace) {
+            is Acc -> null
+            is Jmp -> Nop(instructionToReplace.int)
+            is Nop -> Jmp(instructionToReplace.int)
+        }
+        newInstruction?.let { newIns ->
+            val thisPermutation: MutableMap<Int, Instruction> = indexedInstructions.toMutableMap()
+            thisPermutation.set(index, newIns)
+            thisPermutation.toList().sortedBy { it.first }.map { it.second }
+        }
+    }
+    return allPermutations
+}
+
 fun main() {
     try {
         val instructions = input.map { parseInstruction(it) }
-        val result = execute(instructions)
-        println(result)
+        println(execute(instructions))
+
+        println(generateAlternativeInstructions(instructions).map{execute(it)}.find { it is SuccessfulExecution })
+
+
     } catch (exception: Exception) {
         exception.printStackTrace()
     }

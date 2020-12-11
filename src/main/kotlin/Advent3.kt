@@ -1,7 +1,7 @@
-package advent
+package advent3
 
-import advent.Space.Empty
-import advent.Space.Tree
+import advent3.Space.Empty
+import advent3.Space.Tree
 import java.nio.file.Files
 import java.nio.file.Paths
 

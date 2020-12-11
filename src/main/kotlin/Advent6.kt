@@ -9,16 +9,21 @@ val input: String = Files.readString(
 
 data class Group(val people: List<Person>){
 
-    fun groupQuestions(): Set<Char> {
+    fun groupAnyQuestions(): Set<Char> {
         return people.map{it.questions}.reduce{ allQuestions, newQuestions ->
             allQuestions.union(newQuestions)
+        }
+    }
+    fun groupAllQuestions(): Set<Char> {
+        return people.map{it.questions}.reduce{ allQuestions, newQuestions ->
+            allQuestions.intersect(newQuestions)
         }
     }
 }
 data class Person(val questions: Set<Char>)
 
 fun parseGroup(groupString: String): Group {
-    val people = groupString.split(Regex("""\n""")).map { parsePerson(it) }
+    val people = groupString.trim().split(Regex("""\n""")).map { parsePerson(it) }
     return Group(people)
 }
 
@@ -30,6 +35,6 @@ fun parsePerson(personString: String): Person {
 fun main() {
     val groups = input.split("\n\n").map { parseGroup(it) }
 
-    println(groups.sumBy { it.groupQuestions().size })
-
+    println(groups.sumBy { it.groupAnyQuestions().size })
+    println(groups.sumBy { it.groupAllQuestions().size })
 }

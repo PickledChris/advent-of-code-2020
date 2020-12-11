@@ -26,12 +26,21 @@ val infiniteLines: List<Sequence<Space>> = parsed.map { finiteLine ->
     finiteLine.asSequence().repeat()
 }
 
-fun isTree(right: Int, down: Int): List<Int> = infiniteLines.mapIndexed { index, sequence ->
-    when (sequence.elementAt(index * right)) {
-        Tree -> 1
-        Empty -> 0
-    } }
+fun isTree(right: Int, down: Int): List<Int> = infiniteLines
+    .filterIndexed { index, _ -> index % down == 0 }
+    .mapIndexed { index, sequence ->
+        when (sequence.elementAt(index * right)) {
+            Tree -> 1
+            Empty -> 0
+        }
 
-fun main(args: Array<String>) {
-    println(isTree(3,1).sum())
+    }
+
+fun main() {
+    val oneOne = isTree(1, 1).sum()
+    val threeOne = isTree(3, 1).sum()
+    val fiveOne = isTree(5, 1).sum()
+    val sevenOne = isTree(7, 1).sum()
+    val oneTwo = isTree(1, 2).sum()
+    println(oneOne * threeOne * fiveOne * sevenOne * oneTwo)
 }

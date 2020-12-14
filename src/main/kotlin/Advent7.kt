@@ -47,10 +47,8 @@ fun countContainingBags(bag: String): Int {
 }
 
 fun main() {
-
     println(parsedLines.keys.count { it.containsBag("shiny gold") })
     println(countContainingBags("shiny gold"))
-
 }
 
 
